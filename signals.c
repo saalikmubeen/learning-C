@@ -4,6 +4,12 @@
 #include <signal.h>
 #include <string.h>
 
+
+
+// SIGUSR1 and SIGUSR2 are user-defined signals that can be used by the programmer
+// to handle specific events in the program. These signals are not used by the system
+// and can be used for any purpose by the programmer.
+
 void f_sigint(int s) {
     char buffer[128];
     sprintf(buffer,"Welcome to the island!\n");
@@ -53,6 +59,9 @@ void main() {
     // when the process receives SIGINT
     // it will execute f_sigint
 
+    // OR:
+    // signal(SIGINT, f_sigint); // signal() is an older way to handle signals
+
     /*while(1) {
         sprintf(buffer,"Doing something\n");
         write(1,buffer,strlen(buffer));
@@ -71,4 +80,50 @@ void main() {
     // when it receives the SIGINT signal
     sprintf(buffer,"Message after SIGINT\n");
     write(1,buffer,strlen(buffer));
+}
+
+
+
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int main(int argc, char* argv[]) {
+    int pid = fork();
+    if (pid == -1) {
+        return 1;
+    }
+
+    if (pid == 0) {
+        while (1) {
+            printf("Some output\n");
+            usleep(50000);
+        }
+    } else {
+        kill(pid, SIGSTOP);
+        int t;
+        do {
+            printf("Time in seconds for execution: ");
+            scanf("%d", &t);
+
+            if (t > 0) {
+                kill(pid, SIGCONT);
+                sleep(t);
+                kill(pid, SIGSTOP); // kill(pid, SIGTSTP); // SIGTSTP stops and sends the process to the background
+            }
+        } while (t > 0);
+
+        kill(pid, SIGKILL);
+        wait(NULL);
+    }
+
+    return 0;
 }
