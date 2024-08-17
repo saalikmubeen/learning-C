@@ -3660,6 +3660,7 @@ int bitwise_operators()
   // left, in this case by 2 digits, inserting 0s on the right-hand side.
   // shift left -> add 0s to the right and remove n digits from the left
   // shift left operator (<< n) is equivalent to multiplying by 2^n
+  // u << n = u * 2^n
   // 36 =  0010 0100
   r = x << 2;
   printf("x << 1: %d\n", r); // 36
@@ -3667,21 +3668,35 @@ int bitwise_operators()
   // The shift right operator shifts the bits over some number of digits to the
   // right, in this case by 2 digits, inserting 0s on the left-hand side.
   // shift right -> add 0s to the left and remove n digits from the right
+  // shift right operator (>> n) is equivalent to dividing by 2^n
+  // u >> n = u / 2^n
   // 2 =  0000 0010
   r = x >> 2;
-  printf("x >> 2: %d\n", r); // 2
+  printf("x >> 2: %d\n", r); // 2 (9 / 4 = 2.25, rounds it down towards 0)
+
+
+  // Logical Shift -> add 0s to the left/right and remove n digits from the right/left
+  // Arithmetic Shift -> add 1s/0s to the left/right and remove n digits from the right/left
+  //                     depending on whether the most significant bit is 1 or 0
+
 
   // The one's complement operator flips 1s to 0s and 0s to 1s, when we output
   // the result as an int with %d the result will actually be negative number
   // due to the way C represents negative numbers with what is called 2s
   // complement, see: https://en.wikipedia.org/wiki/Two%27s_complement
   // https://www.youtube.com/watch?v=4qH4unVtJkE&t=581s
-  // To get the negative of a number using one's complement we can add 1 to
-  // the decimal equivalent of the result of the one's complement operation.
+  // To get the negative of a number using one's complement, just
+  // take the one's complement of the number.
   // To get the one's complement of a number we can use the ~ operator.
   // To get the negative of a number using two's complement we first
   // get the one's complement of the number and then add 1 (0000 1001)
   // to the result of the one's complement operation.
+
+  // Similarly to get the positive of a number, we can take the one's
+  // complement of the negative of the number and then add 1 to the result
+  // of the one's complement operation.
+
+  // Two's complement = one's complement + 1
   // -10 = 1111 0110
   r = ~x;
   printf("~x: %d\n", r); // -10
@@ -3707,6 +3722,11 @@ int bitwise_operators()
   // 17 = 0001 0001
   r = x ^ y;
   printf("x ^ y: %d\n", r);
+
+
+
+  // For unsigned integers, the C uses logical sifting to perform multiplication and division by powers of 2.
+  // For signed integers, moslty arithmetic sifting is used but there is no fixed rule/definition in C standard.
 
 }
 
