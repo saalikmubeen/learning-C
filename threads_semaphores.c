@@ -120,3 +120,48 @@ int main(int argc, char *argv[]) {
     sem_destroy(&semFuel);
     return 0;
 }
+
+
+
+
+// Implementing Signal and Wait
+
+
+/*
+class Semaphore {
+  public:
+    void Wait(Process P);
+    void Signal();
+
+  private:
+    int value;
+    Queue Q; // queue of processes;
+
+};
+
+
+Semaphore(int val) {
+  value = val;
+  Q = empty;
+};
+
+
+
+void Semaphore::Wait(Process P) {
+    value = value - 1;
+    if (value < 0) {
+        add P to Q;
+        P->block();
+    }
+}
+
+void Semaphore::Signal() {
+  value = value + 1;
+  if (value <= 0){
+    remove P from Q;
+    wakeup(P);
+  }
+}
+
+
+*/

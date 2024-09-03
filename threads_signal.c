@@ -9,6 +9,7 @@ pthread_mutex_t mutexFuel;
 // Condition variable to signal that fuel is filled
 pthread_cond_t condFuel;
 
+
 int fuel = 0;
 
 void* fuel_filling(void* arg) {
@@ -29,6 +30,7 @@ void* car(void* arg) {
     pthread_mutex_lock(&mutexFuel);
     while (fuel < 40) {
         printf("No fuel. Waiting...\n");
+        // Make the thread wait on a condition (until the fuel is filled) and give up the mutex(lock)
         pthread_cond_wait(&condFuel, &mutexFuel);
         // Equivalent to:
         // pthread_mutex_unlock(&mutexFuel);
@@ -110,3 +112,57 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
+
+
+
+
+
+
+
+
+// Operations on Condition Variables
+//
+// • Condition variable: is a queue of threads waiting for something (some condition to change)
+//   inside a critical section
+// • Condition variables support three operations:
+//      1. Wait(Lock lock): atomic (release lock, go to sleep), when the process wakes up it re-acquires lock.
+//      2. Signal(): wake up waiting thread, if one exists. Otherwise, it does nothing.
+//      3. Broadcast(): wake up all waiting threads
+// • Rule: thread must hold the lock when doing condition variable operations.
+
+
+
+// Mesa versus Hoare Monitors
+// What should happen when signal() is called?
+//      – No waiting threads => the signaler continues and the signal is effectively lost
+//        (unlike what happens with semaphores).
+//      – If there is a waiting thread, one of the threads starts executing, others must wait
+// • Mesa-style: (Nachos, Java, and most real operating systems)
+//     – The thread that signals keeps the lock (and thus the processor).
+//     – The waiting thread waits for the lock to be released. When you are woken up by a signal,
+//        you are not explicitly given the lock (not guaranteed to get the lock, some other thread may get it
+//         before you)
+// • Hoare-style: (most textbooks)
+//      – The thread that signals gives up the lock and the waiting thread gets the lock.
+//      – When the thread that was waiting and is now executing exits or waits again,
+//         it releases the lock back to the signaling thread. You are explicitly given the lock when
+//         you are woken up by a signal.
+
+
+
+
+// Monitors: A Formal Definition
+
+// • A Monitor defines a lock and zero or more condition variables for managing concurrent access to shared data.
+//      – The monitor uses the lock to insure that only a single thread is active in the monitor at any instance.
+//      – The lock also provides mutual exclusion for shared data.
+//      – Condition variables enable threads to go to sleep inside of critical sections, by releasing
+//        their lock at the same time it puts the thread to sleep.
+
+// • Monitor operations:
+//     – Encapsulates the shared data you want to protect.
+//     – Acquires the mutex at the start.
+//     – Operates on the shared data.
+//     – Temporarily releases the mutex if it can't complete.
+//     – Reacquires the mutex when it can continue.
+//     – Releases the mutex at the end.
