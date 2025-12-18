@@ -16,11 +16,19 @@ void* routine(void* args) {
     // If the value is 0, the calling thread will be blocked until the semaphore value is greater than 0
     // sem_wait() is a blocking call if the semaphore value is 0 and will not return until
     // the semaphore value is greater than 0
-    sem_wait(&semaphore);
+    sem_wait(&semaphore); // kinda similar to pthread_mutex_lock()
     printf("(%d) Logged in\n", *(int*)args);
     sleep(rand() % 5 + 1);
     printf("(%d) Logged out\n", *(int*)args);
-    sem_post(&semaphore); // sem_post() increments the semaphore value by 1
+
+    // sem_getvalue() retrieves the current value of the semaphore and stores it in the integer
+    // pointed to by the second argument
+    // int semValue;
+    // sem_getvalue(&semaphore, &semValue);
+    // printf("Semaphore value: %d\n", semValue);
+
+    // sem_post() increments the semaphore value by 1
+    sem_post(&semaphore); // kinda similar to pthread_mutex_unlock()
     free(args);
 }
 

@@ -108,7 +108,11 @@ int main(int argc, char* argv[]) {
             usleep(50000);
         }
     } else {
-        kill(pid, SIGSTOP);
+      kill(pid, SIGSTOP);
+      // send SIGSTOP signal to the child process with process id pid
+      // SIGSTOP will stop that child process from executing and it will be in a
+      // stopped state.
+
         int t;
         do {
             printf("Time in seconds for execution: ");
@@ -117,7 +121,7 @@ int main(int argc, char* argv[]) {
             if (t > 0) {
                 kill(pid, SIGCONT);
                 sleep(t);
-                kill(pid, SIGSTOP); // kill(pid, SIGTSTP); // SIGTSTP stops and sends the process to the background
+                kill(pid, SIGSTOP);
             }
         } while (t > 0);
 

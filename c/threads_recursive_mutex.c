@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h> // #define EBUSY 16 // Resource busy
 
 #define THREAD_NUM 8
 

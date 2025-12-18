@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h> // getpid, fork, execlp, write
 #include <stdio.h>
 #include <string.h>
 #include <sys/wait.h> // waitpid
@@ -15,10 +15,13 @@ void main(int argc,char *argv[]) {
   // fork() returns the process ID ( > 1) of the child process in the parent process
   // fork() returns -1 in the parent process if the fork() fails
 
+  // fork() returns:
   // Inside parent process - child process id - it's going to be different than getpid()
   // Inside child process - 0 - it's going to be different than getpid()
 
 	r = fork();
+
+  // The code from here on is executed by both the parent and the child process
 
 	if (r == 0) { // I am the child
 		sprintf(buffer,"I am the Child with pid: %d\n",getpid());
@@ -129,6 +132,10 @@ int main(int argc, char* argv[]) {
 
 
 // File descriptors:
+// In Linux, a file descriptor is an integer that uniquely identifies an open file.
+// It is used to refer to the file when performing I/O operations on it.
+// It represents a handle to an input or output stream like a file, a socket, a pipe, etc.
+
 // file_descriptor:  file
 // 0:                STDIN
 // 1:                STDOUT
@@ -143,8 +150,11 @@ int main(int argc, char* argv[]) {
 
 // f1:               also (the file descriptor to the) file.txt
 
-
 // int f2 = dup2(file, STDOUT_FILENO); // Redirect the standard output to the file.txt
+// file is file descriptor we want to clone or duplicate and second
+// argument(here STDOUT_FILENO) is the value that we want the duplicated file
+// descriptor to have. Note: No new file descriptor is created, it just replaces
+// the value of the file descriptor. The STDOUT_FILENO now points to the file.txt
 // This will replace the file for the 1(STDOUT_FILENO) with the file.txt(file)
 // Now:
 // STDOUT_FILENO(1):    file.txt
@@ -317,7 +327,7 @@ void main() {
 
 
 
-// Communicating between parent and child processes using pipes
+// * Communicating between parent and child processes using pipes
 
 
 // When you call pipe(fd), the operating system creates a unidirectional data channel
@@ -354,7 +364,7 @@ int main(int argc, char* argv[]) {
 
     if (id == 0) {
         // Child process
-        close(fd[0]);  // Close the read end of the pipe
+        close(fd[0]);  // Close the read end of the pipe for the child process
         int x;
         printf("Input a number: ");
         scanf("%d", &x);
@@ -364,10 +374,10 @@ int main(int argc, char* argv[]) {
             printf("An error ocurred with writing to the pipe\n");
             return 3;
         }
-        close(fd[1]);  // Close the write end after writing
+        close(fd[1]);  // Close the write end after writing for the child process
     } else {
         // Parent process
-        close(fd[1]);  // Close the write end of the pipe
+        close(fd[1]);  // Close the write end of the pipe for the parent process
         int y;
         printf("Waiting for child process to write to the pipe\n");
         if (read(fd[0], &y, sizeof(int)) == -1) {
@@ -377,7 +387,7 @@ int main(int argc, char* argv[]) {
         printf("Got from child process %d\n", y);
         y = y * 3;
         printf("Result is %d\n", y);
-        close(fd[0]);  // Close the read end after reading
+        close(fd[0]);  // Close the read end after reading for the parent process
     }
 
     return 0;
@@ -388,7 +398,7 @@ int main(int argc, char* argv[]) {
 
 
 
-// Named pipes (FIFOs)
+// * Named pipes (FIFOs)
 
 
 #include <stdio.h>
@@ -413,8 +423,13 @@ int main(int argc, char* argv[]) {
     printf("Opening...\n");
 
     // This will block until the other end of the pipe is opened by some
-    // other process to read from it.
+    // other process or thread to read from it.
     int fd = open("myfifo1", O_WRONLY);
+
+    // This will not block and will return the file descriptor immediately
+    // because we are opening it for both reading and writing, so both ends are already open.
+    // int fd = open("myfifo1", O_RDWR);
+
     printf("Opened\n");
     int x = 97;
     if (write(fd, &x, sizeof(x)) == -1) {
@@ -539,8 +554,8 @@ int main(int argc, char* argv[]) {
         // Child process
         // Child process will read the data from the parent process using p1
         // and write the result back to the parent process using p2
-        close(p1[1]); // Close the write end of p1
-        close(p2[0]); // Close the read end of p2
+        close(p1[1]); // Close the write end of p1 for the child process
+        close(p2[0]); // Close the read end of p2 for the child process
 
         int x;
         if (read(p1[0], &x, sizeof(int)) == -1) {
@@ -558,8 +573,8 @@ int main(int argc, char* argv[]) {
         close(p2[1]); // Close the write end of p2 after writing is done
     } else {
         // Parent process
-        close(p1[0]); // Close the read end of p1
-        close(p2[1]); // Close the write end of p2
+        close(p1[0]); // Close the read end of p1 for the parent process
+        close(p2[1]); // Close the write end of p2 for the parent process
 
         srand(time(NULL));
         int y = rand() % 10;
@@ -581,3 +596,8 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+// Wrote 1
+// Received 1
+// Wrote 4
+// Result is 4

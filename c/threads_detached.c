@@ -5,6 +5,9 @@
 * Description: Example of using detached threads in C with the POSIX thread
 * library.  This program uses a detached thread to write a log entry to a log
 * file approx. every second until the program terminates.
+* Detached threads can't be joined later.
+* Detached threads automatically release their resources when they terminate. They are used
+* when you don't need to synchronize with the thread or retrieve its return value.
 *
 *******************************************************************************/
 #include <stdio.h>
@@ -147,7 +150,8 @@ int main()
 
 
 
-// Barrier in pthreads
+// *Barrier in pthreads
+
 
 #include <pthread.h>
 #include <stdio.h>
